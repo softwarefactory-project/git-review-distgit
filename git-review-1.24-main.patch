@@ -1,0 +1,48 @@
+(cherry-picked with corrections)
+
+commit 856ccd958bd4c47158aae574b6211f7da2b57be7
+Author: Cedric Brandily <zzelle@gmail.com>
+Date:   Thu Sep 4 14:24:59 2014 +0200
+
+    Align git-review and python -m git_review.cmd behaviors
+    
+    Currently, python -m git_review.cmd wraps git_review.cmd.main call to
+    handle correctly unicode in python2 where git-review calls directly
+    git_review.cmd.main. This change embeds the wrapper inside main in
+    order to align git-review and python -m git_review.cmd behaviors.
+    
+    Change-Id: I390e2d68b851299c3b07292b89dee8198068e6aa
+
+diff --git a/git_review/cmd.py b/git_review/cmd.py
+index a1c655a..2619989 100755
+--- a/git_review/cmd.py
++++ b/git_review/cmd.py
+@@ -1033,7 +1043,7 @@ def convert_bool(one_or_zero):
+     return one_or_zero in ["1", "true", "True"]
+ 
+ 
+-def main():
++def _main():
+     usage = "git review [OPTIONS] ... [BRANCH]"
+ 
+     import argparse
+@@ -1256,9 +1262,9 @@ def main():
+     sys.exit(status)
+ 
+ 
+-if __name__ == "__main__":
++def main():
+     try:
+-        main()
++        _main()
+     except GitReviewException as e:
+         # If one does unguarded print(e) here, in certain locales the implicit
+         # str(e) blows up with familiar "UnicodeEncodeError ... ordinal not in
+@@ -1269,3 +1277,7 @@ if __name__ == "__main__":
+         else:
+             print(u.encode('utf-8'))
+         sys.exit(e.EXIT_CODE)
++
++
++if __name__ == "__main__":
++    main()
